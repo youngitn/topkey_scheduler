@@ -1,0 +1,26 @@
+spring:
+ application:
+  name: scheduler-service
+ cloud:
+  consul:
+    config:
+     enabled: true
+     prefixes: config
+     watch:
+      enabled: true
+     format: yaml
+     fail-fast: true
+    discovery:
+     serviceName: scheduler-service
+     tags: loacaltest
+     healthCheckInterval: 10s
+     healthCheckCriticalTimeout: 30s
+
+management:
+ endpoint:
+  health:
+   show-details: always
+ endpoints:
+  web:
+   exposure:
+    include: "*"
