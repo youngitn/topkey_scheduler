@@ -35,7 +35,7 @@ public class VnAccountRecordJob extends QuartzJobBean {
 
             // 設置郵件內容
             helper.setFrom("oa@topkey.com.tw"); // 寄件人
-            helper.setTo(new String[]{"pcyeh@topkey.com.tw","pcyeh@topkey.com.tw"});
+            helper.setTo(new String[]{"jickawei@topkey.com.tw","pcyeh@topkey.com.tw"});
             helper.setSubject("TKVN帳號權限管理_今日帳號權限到期名單"); // 主題
             
             //產生寄送內容
