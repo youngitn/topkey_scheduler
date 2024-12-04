@@ -154,7 +154,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<mainClass>com.topkey.api.App</mainClass>
+					<mainClass>com.topkey.scheduler.App</mainClass>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
