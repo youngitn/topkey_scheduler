@@ -57,4 +57,6 @@ spring:
     healthCheckUrl: http://10.4.4.136:${server.port}/actuator/health
     tags: localtest
 
-
+custom:
+ logstash_uri: 10.4.0.53:4660
+ appender_ref: TCP_LOGSTASH
