@@ -14,6 +14,7 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 import com.topkey.scheduler.erp.quartz.TestQ;
 import com.topkey.scheduler.oa.quartz.TestJob;
+import com.topkey.scheduler.oa.quartz.VnAccountRecordJob;
 
 @Configuration
 public class QuartzConfigration {
@@ -49,7 +50,15 @@ public class QuartzConfigration {
 //        return trigger;
 //    }
 //    
+	/**
+	 * TKVN帳號權限管理-自動檢測到期名單排程
+	 * */
+	@Bean
+    JobDetail Quartz_OAVnAccountRecord() {		
+		return JobBuilder.newJob(VnAccountRecordJob.class).withIdentity("VnAccountRecordTask").storeDurably().build();
+	}
     // 用withIdentity建立job id
+
     @Bean
     JobDetail testQuartz1() {
 		return JobBuilder.newJob(TestJob.class).withIdentity("testTask1").storeDurably().build();
@@ -61,6 +70,19 @@ public class QuartzConfigration {
 		return JobBuilder.newJob(TestQ.class).withIdentity("testTask2").storeDurably().build();
 	}
 
+
+
+    // 用job id來註冊排程
+    @Bean
+    Trigger QuartzTrigger_OAVnAccountRecord() {
+    	// 使用 cron 表達式設定每天8點執行
+    	String cronExpression = "0 0 08 * * ?"; // 每天早上08:00執行
+    	return TriggerBuilder.newTrigger().forJob("VnAccountRecordTask") // 指定要觸發的任務
+    					.withSchedule(CronScheduleBuilder.cronSchedule(cronExpression)) // 使用 Cron 表達式
+    					.build();     	
+	}
+
+    
     // 用job id來註冊排程
     @Bean
     Trigger testQuartzTrigger1() {
@@ -89,5 +111,6 @@ public class QuartzConfigration {
 				.withSchedule(CronScheduleBuilder.cronSchedule(cronExpression)) // 使用 Cron 表達式
 				.build();
 	}
+	
 
 }
