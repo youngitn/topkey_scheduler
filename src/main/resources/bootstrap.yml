@@ -12,7 +12,6 @@ spring:
      fail-fast: true
     discovery:
      serviceName: scheduler-service
-     tags: loacaltest
      healthCheckInterval: 10s
      healthCheckCriticalTimeout: 30s
 

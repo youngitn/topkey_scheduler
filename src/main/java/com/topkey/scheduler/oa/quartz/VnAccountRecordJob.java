@@ -1,12 +1,11 @@
 package com.topkey.scheduler.oa.quartz;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
+
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.quartz.QuartzJobBean;
@@ -14,17 +13,21 @@ import org.springframework.stereotype.Component;
 
 import com.topkey.scheduler.oa.entity.Ekp_vn_account_record;
 import com.topkey.scheduler.oa.repo.VnAccountRecordRepository;
-import jakarta.mail.internet.MimeMessage;
 
+import jakarta.mail.internet.MimeMessage;
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 @Component
 public class VnAccountRecordJob extends QuartzJobBean {
-	private static final Logger logger = LoggerFactory.getLogger(VnAccountRecordJob.class);
 	
     @Autowired
     private VnAccountRecordRepository srp;
     @Autowired
     private JavaMailSender mailSender;
-       
+    
+    @Value("${vn.sendto.username}")
+	private String sendto;
+    
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         try {
@@ -35,7 +38,7 @@ public class VnAccountRecordJob extends QuartzJobBean {
 
             // 設置郵件內容
             helper.setFrom("oa@topkey.com.tw"); // 寄件人
-            helper.setTo(new String[]{"jickawei@topkey.com.tw","pcyeh@topkey.com.tw"});
+            helper.setTo(getEmails(sendto));
             helper.setSubject("TKVN帳號權限管理_今日帳號權限到期名單"); // 主題
             
             //產生寄送內容
@@ -47,11 +50,11 @@ public class VnAccountRecordJob extends QuartzJobBean {
             
             // 發送郵件
             mailSender.send(mimeMessage);
-            logger.info("VnAccountRecordJob：Email sent successfully!");                
+            log.info("VnAccountRecordJob：Email sent successfully!");                
 
         } catch (Exception e) {
         	String errMsg = String.format("VnAccountRecordJob：Error while sending email. Details: %s", e.getMessage());
-        	logger.error(errMsg, e); // 記錄詳細的錯誤堆棧信息
+        	log.error(errMsg, e); // 記錄詳細的錯誤堆棧信息
         	throw new JobExecutionException("Failed to send email.", e); // 保留原始異常信息
         }
     }
@@ -66,7 +69,7 @@ public class VnAccountRecordJob extends QuartzJobBean {
             if (records == null || records.isEmpty()) {
                 String noDataMessage = "今日查無符合條件的資料。\n";
                 tableContent.append(noDataMessage);
-                logger.info(noDataMessage);
+                log.info(noDataMessage);
                 return tableContent;
             }
 
@@ -90,10 +93,10 @@ public class VnAccountRecordJob extends QuartzJobBean {
                     safeSubstring(record.getDEndDate(), 0, 10)
                 }, columnWidths, "");
             }
-            logger.info("VnAccountRecordJob 郵件內容生成成功：\n{}", tableContent);
+            log.info("VnAccountRecordJob 郵件內容生成成功：\n{}", tableContent);
         } catch (Exception e) {
             // 捕捉並記錄詳細錯誤訊息
-            logger.error("VnAccountRecordJob 在生成郵件內容時發生錯誤：", e);
+            log.error("VnAccountRecordJob 在生成郵件內容時發生錯誤：", e);
             tableContent.append("VnAccountRecordJob 生成郵件內容時發生錯誤，請聯絡管理員檢查系統日誌。\n");
         }
         return tableContent;
@@ -127,6 +130,21 @@ public class VnAccountRecordJob extends QuartzJobBean {
             return "";
         }
         return input.substring(start, Math.min(input.length(), end));
+    }
+    
+    public String[] getEmails(String sendto) {
+        if (sendto == null || sendto.isEmpty()) {
+            return new String[0]; // 或許你想回傳 null 或拋出異常
+        }
+
+        String[] names = sendto.split(",");
+        String[] emails = new String[names.length];
+
+        for (int i = 0; i < names.length; i++) {
+            emails[i] = names[i] + "@topkey.com.tw";
+        }
+
+        return emails;
     }
 
 
